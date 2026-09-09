@@ -23,6 +23,22 @@ const rotateOptions = (correct: string, candidates: string[], index: number) => 
   return { options: rotated, correctOption: rotated.indexOf(correct) }
 }
 
+// A final guard keeps any accidentally repeated wording out of a structure's
+// exam set, even when two data fields happen to contain the same text.
+const uniqueQuestions = (questions: AnatomyQuestion[]) => {
+  const seen = new Set<string>()
+  return questions.filter(question => {
+    const key = question.prompt
+      .toLocaleLowerCase()
+      .replace(/[\u064B-\u065F\u0670]/g, '')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .trim()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 const englishQuestionsFor = (part: AnatomyTreeNode): AnatomyQuestion[] => {
   const name = part.name
   const diseases = part.diseases.join(', ')
@@ -73,7 +89,7 @@ const englishQuestionsFor = (part: AnatomyTreeNode): AnatomyQuestion[] => {
       `State one examination clue and one clinical implication before concluding.`,
       `Contrast the normal finding with a relevant abnormal finding.`,
       `Use a short, examiner-ready sequence: anatomy, function, assessment, and risk.`
-    ][index % 4]
+    ][Math.floor(index / essaySeeds.length) % 4]
     return { id: part.id+'-essay-'+index, type: 'essay', track, title: title+' · '+(index+1), prompt: prompt+' '+extension, answer }
   })
   const mcq = facts.flatMap((fact, index) => {
@@ -106,7 +122,7 @@ const englishQuestionsFor = (part: AnatomyTreeNode): AnatomyQuestion[] => {
       { id: part.id+'-tf-'+index+'g', type: 'trueFalse' as const, track: 'oral' as const, title: 'True or false · Examiner check', prompt: `True or false: “${incorrect}” is the safest examiner-ready answer about ${name}.`, answer: `False. The examiner-ready answer is: ${fact.value}`, options: ['True', 'False'], correctOption: 1 }
     ]
   })
-  return [...essay, ...mcq.slice(0, 50), ...trueFalse.slice(0, 50)]
+  return uniqueQuestions([...essay, ...mcq.slice(0, 50), ...trueFalse.slice(0, 50)])
 }
 
 export const questionsFor = (part: AnatomyTreeNode, language: 'ar' | 'en' = 'ar'): AnatomyQuestion[] => {
@@ -162,7 +178,7 @@ export const questionsFor = (part: AnatomyTreeNode, language: 'ar' | 'en' = 'ar'
       'اذكر علامة فحص واحدة ودلالة سريرية واحدة قبل إنهاء الإجابة.',
       'قارن بين المظهر الطبيعي ومظهر غير طبيعي ذي صلة.',
       'استخدم تسلسلاً مناسباً للامتحان: تشريح، وظيفة، فحص، ثم خطر سريري.'
-    ][index % 4]
+    ][Math.floor(index / essaySeeds.length) % 4]
     return { id: part.id+'-essay-'+index, type: 'essay', track, title: title+' · '+(index+1), prompt: prompt+' '+extension, answer }
   })
 
@@ -198,5 +214,5 @@ export const questionsFor = (part: AnatomyTreeNode, language: 'ar' | 'en' = 'ar'
     ]
   })
 
-  return [...essay, ...mcq.slice(0, 50), ...trueFalse.slice(0, 50)]
+  return uniqueQuestions([...essay, ...mcq.slice(0, 50), ...trueFalse.slice(0, 50)])
 }
