@@ -275,8 +275,7 @@ onBeforeUnmount(()=>dispose())
   .node-title{border-inline-end:0;border-bottom:1px solid #1b3650;padding:14px}
   .medical-card{padding:0 14px 14px}
   .control-deck{padding:11px 12px;gap:9px}
-  .slider-control{flex:1 1 100%;justify-content:center}
-  .slider-control label{grid-template-columns:auto minmax(120px,1fr) auto;width:min(100%,340px)}
+  .slider-control{display:none}
   .quiz-link{width:100%;margin:0;text-align:center}
 }
 </style>
