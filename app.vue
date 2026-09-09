@@ -1,0 +1,1 @@
+<template><NuxtPwaManifest /><NuxtPage /></template>
