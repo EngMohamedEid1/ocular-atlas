@@ -1,4 +1,5 @@
 import type { AnatomyTreeNode } from './ocularTree'
+import { medicalReferenceFor, type MedicalReference } from './medicalReferences'
 
 export type QuestionType = 'essay' | 'mcq' | 'trueFalse'
 export type QuestionTrack = 'oral' | 'practical'
@@ -12,6 +13,7 @@ export type AnatomyQuestion = {
   answer: string
   options?: string[]
   correctOption?: number
+  reference?: MedicalReference
 }
 
 type Fact = { label: string; value: string }
@@ -179,11 +181,12 @@ const triadQuestions = (part: AnatomyTreeNode, facts: Fact[], language: Language
 
 export const questionsFor = (part: AnatomyTreeNode, language: Language = 'ar'): AnatomyQuestion[] => {
   const facts = factList(part, language)
+  const reference = medicalReferenceFor(part)
   return uniqueQuestions([
     ...coreQuestions(part, facts, language),
     ...pairedQuestions(part, facts, language, 1, 1, 'link'),
     ...pairedQuestions(part, facts, language, 2, 2, 'assessment'),
     ...pairedQuestions(part, facts, language, 3, 3, 'decision'),
     ...triadQuestions(part, facts, language)
-  ])
+  ]).map(question => ({ ...question, reference }))
 }
